@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Button from '../Button';
 
 import styles from './ToastPlayground.module.css';
@@ -5,6 +6,11 @@ import styles from './ToastPlayground.module.css';
 const VARIANT_OPTIONS = ['notice', 'warning', 'success', 'error'];
 
 function ToastPlayground() {
+  const [message, setMessage] = useState('');
+  console.log(message);
+
+  const handleSubmit = () => {};
+
   return (
     <div className={styles.wrapper}>
       <header>
@@ -22,51 +28,29 @@ function ToastPlayground() {
             Message
           </label>
           <div className={styles.inputWrapper}>
-            <textarea id="message" className={styles.messageInput} />
+            <textarea
+              id="message"
+              className={styles.messageInput}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
           </div>
         </div>
 
         <div className={styles.row}>
           <div className={styles.label}>Variant</div>
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <label htmlFor="variant-notice">
-              <input
-                id="variant-notice"
-                type="radio"
-                name="variant"
-                value="notice"
-              />
-              notice
-            </label>
-            <label htmlFor="variant-warning">
-              <input
-                id="variant-warning"
-                type="radio"
-                name="variant"
-                value="warning"
-              />
-              warning
-            </label>
-            <label htmlFor="variant-success">
-              <input
-                id="variant-success"
-                type="radio"
-                name="variant"
-                value="success"
-              />
-              success
-            </label>
-            <label htmlFor="variant-error">
-              <input
-                id="variant-error"
-                type="radio"
-                name="variant"
-                value="error"
-              />
-              error
-            </label>
-
-            {/* TODO Other Variant radio buttons here */}
+            {VARIANT_OPTIONS.map((type, i) => (
+              <label htmlFor={`variant-${type}`} key={`${type} - ${i}`}>
+                <input
+                  id={`variant-${type}`}
+                  type="radio"
+                  name="variant"
+                  value={type}
+                />
+                {type}
+              </label>
+            ))}
           </div>
         </div>
 
