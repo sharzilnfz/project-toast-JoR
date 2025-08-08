@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AlertOctagon,
   AlertTriangle,
@@ -7,8 +6,10 @@ import {
   X,
 } from 'react-feather';
 
-import VisuallyHidden from '../VisuallyHidden';
+import { useToasts } from '../../context/ToastProvider';
 
+import { memo } from 'react';
+import VisuallyHidden from '../VisuallyHidden';
 import styles from './Toast.module.css';
 
 const ICONS_BY_VARIANT = {
@@ -18,16 +19,18 @@ const ICONS_BY_VARIANT = {
   error: AlertOctagon,
 };
 
-function Toast() {
+function Toast({ variant, children, id }) {
+  const { removeToast } = useToasts();
+  const ICON = ICONS_BY_VARIANT[variant] || Info;
+  console.log('redering toast');
+
   return (
-    <div className={`${styles.toast} ${styles.notice}`}>
+    <div className={`${styles.toast} ${styles[variant]}`}>
       <div className={styles.iconContainer}>
-        <Info size={24} />
+        <ICON size={24} />
       </div>
-      <p className={styles.content}>
-        16 photos have been uploaded
-      </p>
-      <button className={styles.closeButton}>
+      <p className={styles.content}>{children || ''}</p>
+      <button className={styles.closeButton} onClick={() => removeToast(id)}>
         <X size={24} />
         <VisuallyHidden>Dismiss message</VisuallyHidden>
       </button>
@@ -35,4 +38,4 @@ function Toast() {
   );
 }
 
-export default Toast;
+export default memo(Toast);

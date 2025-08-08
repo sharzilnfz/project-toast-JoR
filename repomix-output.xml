@@ -1,0 +1,1102 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+public/
+  index.html
+src/
+  components/
+    App/
+      App.js
+      index.js
+    Button/
+      Button.js
+      Button.module.css
+      index.js
+    Footer/
+      Footer.js
+      Footer.module.css
+      index.js
+    Toast/
+      index.js
+      Toast.js
+      Toast.module.css
+    ToastPlayground/
+      index.js
+      ToastPlayground.js
+      ToastPlayground.module.css
+    ToastShelf/
+      index.js
+      ToastShelf.js
+      ToastShelf.module.css
+    VisuallyHidden/
+      index.js
+      VisuallyHidden.js
+      VisuallyHidden.module.css
+  context/
+    MessageProvider.js
+    ToastProvider.js
+    VariantProvider.js
+  global-styles.css
+  index.js
+.dockerignore
+.eslintrc.json
+.gitignore
+.parcelrc
+compose.yaml
+Dockerfile
+LICENSE.md
+package.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/context/MessageProvider.js">
+import { createContext, useMemo, useState } from 'react';
+
+export const messageContext = createContext();
+
+const MessageProvider = ({ children }) => {
+  const [message, setMessage] = useState('');
+
+  const value = useMemo(() => {
+    return { message, setMessage };
+  }, [message]);
+
+  return (
+    <messageContext.Provider value={value}>{children}</messageContext.Provider>
+  );
+};
+
+export default MessageProvider;
+</file>
+
+<file path="src/context/ToastProvider.js">
+import React from 'react';
+
+const ToastContext = React.createContext();
+
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = React.useState([]);
+
+  const createToast = React.useCallback((message, variant) => {
+    setToasts((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), variant, message },
+    ]);
+  }, []);
+
+  const removeToast = React.useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const value = React.useMemo(
+    () => ({ createToast, removeToast, toasts }),
+    [toasts, createToast, removeToast]
+  );
+
+  return (
+    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
+  );
+}
+
+export function useToasts() {
+  const context = React.useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToasts must be used within a ToastProvider');
+  }
+  return context;
+}
+</file>
+
+<file path="src/context/VariantProvider.js">
+import { createContext, useMemo, useState } from 'react';
+
+const VARIANT_OPTIONS = ['notice', 'warning', 'success', 'error'];
+
+export const variantContext = createContext();
+
+const VariantProvider = ({ children }) => {
+  const [variant, setVariant] = useState(VARIANT_OPTIONS[0]);
+
+  const value = useMemo(() => {
+    return { variant, setVariant, VARIANT_OPTIONS };
+  }, [variant]);
+
+  return (
+    <variantContext.Provider value={value}>{children}</variantContext.Provider>
+  );
+};
+
+export default VariantProvider;
+</file>
+
+<file path=".dockerignore">
+# Include any files or directories that you don't want to be copied to your
+# container here (e.g., local build artifacts, temporary files, etc.).
+#
+# For more help, visit the .dockerignore file reference guide at
+# https://docs.docker.com/go/build-context-dockerignore/
+
+**/.classpath
+**/.dockerignore
+**/.env
+**/.git
+**/.gitignore
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/.vscode
+**/.next
+**/.cache
+**/*.*proj.user
+**/*.dbmdl
+**/*.jfm
+**/charts
+**/docker-compose*
+**/compose.y*ml
+**/Dockerfile*
+**/node_modules
+**/npm-debug.log
+**/obj
+**/secrets.dev.yaml
+**/values.dev.yaml
+**/build
+**/dist
+LICENSE
+README.md
+</file>
+
+<file path="compose.yaml">
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+    ports:
+      - 7676:7676
+
+# The commented out section below is an example of how to define a PostgreSQL
+# database that your application can use. `depends_on` tells Docker Compose to
+# start the database before your application. The `db-data` volume persists the
+# database data between container restarts. The `db-password` secret is used
+# to set the database password. You must create `db/password.txt` and add
+# a password of your choosing to it before running `docker-compose up`.
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#   db:
+#     image: postgres
+#     restart: always
+#     user: postgres
+#     secrets:
+#       - db-password
+#     volumes:
+#       - db-data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=example
+#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+#     expose:
+#       - 5432
+#     healthcheck:
+#       test: [ "CMD", "pg_isready" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+# volumes:
+#   db-data:
+# secrets:
+#   db-password:
+#     file: db/password.txt
+</file>
+
+<file path="Dockerfile">
+# syntax=docker/dockerfile:1
+
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
+
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+
+ARG NODE_VERSION=24.3.0
+
+FROM node:${NODE_VERSION}-alpine
+
+# Use production node environment by default.
+ENV NODE_ENV production
+
+
+WORKDIR /usr/src/app
+
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.npm to speed up subsequent builds.
+# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
+# into this layer.
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
+
+# Run the application as a non-root user.
+USER node
+
+# Copy the rest of the source files into the image.
+COPY . .
+
+# Expose the port that the application listens on.
+EXPOSE 7676
+
+# Run the application.
+CMD npm run dev
+</file>
+
+<file path="src/components/App/App.js">
+import MessageProvider from '../../context/MessageProvider';
+import { ToastProvider } from '../../context/ToastProvider';
+import VariantProvider from '../../context/VariantProvider';
+import Footer from '../Footer';
+import ToastPlayground from '../ToastPlayground';
+
+function App() {
+  return (
+    <>
+      <MessageProvider>
+        <VariantProvider>
+          <ToastProvider>
+            <ToastPlayground />
+          </ToastProvider>
+        </VariantProvider>
+      </MessageProvider>
+      <Footer />
+    </>
+  );
+}
+
+export default App;
+</file>
+
+<file path="src/components/App/index.js">
+export * from "./App";
+export { default } from "./App";
+</file>
+
+<file path="src/components/Button/Button.js">
+import React from 'react';
+
+import styles from './Button.module.css';
+
+function Button({ className = '', ...delegated }) {
+  return (
+    <button
+      className={`${styles.button} ${className}`}
+      {...delegated}
+    />
+  );
+}
+
+export default Button;
+</file>
+
+<file path="src/components/Button/Button.module.css">
+.button {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 4px;
+  background: linear-gradient(
+    to top,
+    hsl(245deg 50% 30%),
+    hsl(280deg 60% 44%)
+  );
+  color: white;
+  font-weight: 600;
+  font-size: 1.25rem;
+  cursor: pointer;
+  outline-offset: 4px;
+}
+</file>
+
+<file path="src/components/Button/index.js">
+export * from "./Button";
+export { default } from "./Button";
+</file>
+
+<file path="src/components/Footer/Footer.js">
+import React from 'react';
+
+import styles from './Footer.module.css';
+
+function Footer() {
+  return (
+    <footer className={styles.wrapper}>
+      <p>
+        This project is from{' '}
+        <a target="_blank" rel="noopener noreferrer" href="https://joyofreact.com">
+          The Joy of React
+        </a>
+        , a comprehensive React.js course.
+      </p>
+      <p>© 2022-present Joshua Comeau. All rights reserved.</p>
+    </footer>
+  );
+}
+
+export default Footer;
+</file>
+
+<file path="src/components/Footer/index.js">
+export * from "./Footer";
+export { default } from "./Footer";
+</file>
+
+<file path="src/components/Toast/index.js">
+export * from "./Toast";
+export { default } from "./Toast";
+</file>
+
+<file path="src/components/Toast/Toast.js">
+import {
+  AlertOctagon,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  X,
+} from 'react-feather';
+
+import { useToasts } from '../../context/ToastProvider';
+
+import { memo } from 'react';
+import VisuallyHidden from '../VisuallyHidden';
+import styles from './Toast.module.css';
+
+const ICONS_BY_VARIANT = {
+  notice: Info,
+  warning: AlertTriangle,
+  success: CheckCircle,
+  error: AlertOctagon,
+};
+
+function Toast({ variant, children, id }) {
+  const { removeToast } = useToasts();
+  const ICON = ICONS_BY_VARIANT[variant] || Info;
+  console.log('redering toast');
+
+  return (
+    <div className={`${styles.toast} ${styles[variant]}`}>
+      <div className={styles.iconContainer}>
+        <ICON size={24} />
+      </div>
+      <p className={styles.content}>{children || ''}</p>
+      <button className={styles.closeButton} onClick={() => removeToast(id)}>
+        <X size={24} />
+        <VisuallyHidden>Dismiss message</VisuallyHidden>
+      </button>
+    </div>
+  );
+}
+
+export default memo(Toast);
+</file>
+
+<file path="src/components/ToastPlayground/index.js">
+export * from "./ToastPlayground";
+export { default } from "./ToastPlayground";
+</file>
+
+<file path="src/components/ToastShelf/index.js">
+export * from "./ToastShelf";
+export { default } from "./ToastShelf";
+</file>
+
+<file path="src/components/ToastShelf/ToastShelf.js">
+import { memo } from 'react';
+import { useToasts } from '../../context/ToastProvider';
+import Toast from '../Toast';
+import styles from './ToastShelf.module.css';
+
+function ToastShelf() {
+  console.log('rendering shelf');
+
+  const { toasts } = useToasts();
+
+  return (
+    <ol className={styles.wrapper}>
+      {toasts.map((toast) => (
+        <li className={styles.toastWrapper} key={toast.id}>
+          <Toast variant={toast.variant} id={toast.id}>
+            {toast.message}
+          </Toast>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export default memo(ToastShelf);
+</file>
+
+<file path="src/components/ToastShelf/ToastShelf.module.css">
+@keyframes toast {
+  from {
+    transform: translateX(calc(100% + 64px));
+  }
+}
+
+.wrapper {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  list-style-type: none;
+}
+
+.toastWrapper {
+  animation: toast 800ms cubic-bezier(0, 0.46, 0, 1.04) both;
+  will-change: transform;
+}
+</file>
+
+<file path="src/components/VisuallyHidden/index.js">
+export * from "./VisuallyHidden";
+export { default } from "./VisuallyHidden";
+</file>
+
+<file path="src/components/VisuallyHidden/VisuallyHidden.module.css">
+.showWrapper {
+  font-size: 0.5rem;
+}
+
+.wrapper {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+</file>
+
+<file path="src/global-styles.css">
+/*
+  Josh's Custom CSS Reset
+  https://www.joshwcomeau.com/css/custom-css-reset/
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-family: 'Lato', sans-serif;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* Custom global styles */
+html {
+  color-scheme: dark;
+
+  --color-notice: hsl(235deg 100% 50%);
+  --color-notice-bg: hsl(235deg 0% 100%);
+  --color-warning: hsl(35deg 100% 46%);
+  --color-warning-bg: hsl(40deg 100% 94%);
+  --color-success: hsl(120deg 80% 35%);
+  --color-success-bg: hsl(120deg 90% 96%);
+  --color-error: hsl(345deg 100% 50%);
+  --color-error-bg: hsl(350deg 90% 96%);
+
+  --shadow-color: 250deg 35% 11%;
+  /* prettier-ignore */
+  --shadow-elevation-low:
+  0px 0.6px 0.6px hsl(var(--shadow-color) / 0.26),
+  0px 0.8px 0.8px -1.6px hsl(var(--shadow-color) / 0.22),
+  0px 1.8px 1.8px -3.2px hsl(var(--shadow-color) / 0.19);
+  /* prettier-ignore */
+  --shadow-elevation-medium:
+  0px 0.3px 0.6px hsl(var(--shadow-color) / 0.2),
+  0px 0.7px 1.4px -1.1px hsl(var(--shadow-color) / 0.19),
+  0px 1.5px 3.7px -2.1px hsl(var(--shadow-color) / 0.18),
+  0.1px 4px 9.2px -3.2px hsl(var(--shadow-color) / 0.17),
+  0.2px 6px 15px -2.3px hsl(var(--shadow-color) / 0.16);
+  /* prettier-ignore */
+  --shadow-elevation-high:
+    0px 0.6px 0.6px hsl(var(--shadow-color) / 0.26),
+    0px 1.8px 1.8px -0.5px hsl(var(--shadow-color) / 0.24),
+    0px 3.2px 3.3px -0.9px hsl(var(--shadow-color) / 0.23),
+    0.1px 5.4px 5.5px -1.4px hsl(var(--shadow-color) / 0.21),
+    0.1px 9.1px 9.3px -1.8px hsl(var(--shadow-color) / 0.2),
+    0.2px 14.7px 15px -2.3px hsl(var(--shadow-color) / 0.19),
+    0.3px 22.8px 23.3px -2.7px hsl(var(--shadow-color) / 0.17),
+    0.4px 34.2px 34.9px -3.2px hsl(var(--shadow-color) / 0.16);
+}
+
+body {
+  background-attachment: fixed;
+  background-image: conic-gradient(
+    from 270deg at 50% -20%,
+    hsl(240deg 40% 5%) 50%,
+    hsl(250deg 40% 20%),
+    hsl(250deg 30% 25%),
+    hsl(250deg 40% 20%),
+    hsl(240deg 40% 5%)
+  );
+}
+</file>
+
+<file path=".eslintrc.json">
+{
+  "extends": "react-app"
+}
+</file>
+
+<file path=".parcelrc">
+{
+  "extends": [
+    "@parcel/config-default"
+  ],
+  "reporters": [
+    "...",
+    "parcel-reporter-static-files-copy"
+  ]
+}
+</file>
+
+<file path="LICENSE.md">
+# Josh's Course Materials License
+
+Version 1, November 2020
+Copyright (c) Josh Comeau, 2020-present
+
+The files in this repository are meant to be used as part of a paid course, and are not intended for public distribution. They're open-source because it's the simplest form of distribution, and provides the best experience for students enrolled in the course.
+
+All are welcome to create personal copies of this repository, and modify its contents for educational use. Please experiment with the code, and see what you can build!
+
+It is forbidden to use these contents in any sort of commercial endeavour, including but not limited to:
+
+• Reselling its contents as part of a different course
+• Incorporating the code into a pre-existing business or project
+• Selling your solution to students enrolled in the course
+
+Exemptions can be made, on a case-by-case basis. Contact Josh Comeau (support@joshwcomeau.com) for more information.
+</file>
+
+<file path="src/components/Footer/Footer.module.css">
+.wrapper {
+  padding: 32px 16px 64px;
+  max-width: 500px;
+  margin: 32px auto;
+  text-align: center;
+}
+
+.wrapper p {
+  font-size: 0.875rem;
+  color: hsl(230deg 75% 88%);
+}
+
+.wrapper p a {
+  font-weight: 700;
+  text-decoration: none;
+  color: hsl(230deg 90% 95%);
+}
+.wrapper p a:hover {
+  text-decoration: underline;
+}
+.wrapper p:not(:last-of-type) {
+  margin-bottom: 1em;
+}
+</file>
+
+<file path="src/components/Toast/Toast.module.css">
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 16px;
+  color: black;
+  color-scheme: light;
+  background: white;
+  max-width: 100%;
+  width: 350px;
+  box-shadow: var(--shadow-elevation-medium);
+}
+
+.content {
+  flex: 1;
+  padding: 12px 0px;
+  font-weight: 600;
+}
+
+.iconContainer {
+  flex-shrink: 0;
+  padding: 16px;
+  padding-right: 0px;
+}
+.iconContainer svg {
+  display: block;
+}
+
+.closeButton {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.notice {
+  background: var(--color-notice-bg);
+}
+.notice .iconContainer {
+  color: var(--color-notice);
+}
+.warning {
+  background: var(--color-warning-bg);
+}
+.warning .iconContainer {
+  color: var(--color-warning);
+}
+.success {
+  background: var(--color-success-bg);
+}
+.success .iconContainer {
+  color: var(--color-success);
+}
+.error {
+  background: var(--color-error-bg);
+}
+.error .iconContainer {
+  color: var(--color-error);
+}
+</file>
+
+<file path="src/components/ToastPlayground/ToastPlayground.module.css">
+.wrapper {
+  padding: 64px 32px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.wrapper header {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 64px;
+  min-height: 300px;
+}
+
+.wrapper header h1 {
+  position: relative;
+  font-size: 4.25rem;
+  line-height: 1.1;
+  padding-bottom: 32px;
+  color: white;
+  /* prettier-ignore */
+  text-shadow:
+    0px 0px 10px hsl(250deg 40% 16% / 0.5),
+    0px 0px 20px hsl(250deg 40% 16% / 0.5),
+    0px 0px 40px hsl(250deg 40% 16% / 0.5);
+}
+
+.wrapper header img {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: 250px;
+}
+
+.controlsWrapper {
+  color-scheme: light;
+  outline: 2px dashed hsl(250deg 80% 80% / 0.6);
+  outline-offset: 4px;
+  border-radius: 4px;
+  background: white;
+  color: black;
+  padding: 16px;
+  margin-top: 32px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  /*
+    This is the height when a row contains a text input.
+    We specify it to prevent a layout shift when `dismiss-after`
+    is toggled on/off.
+  */
+  min-height: 3rem;
+}
+
+.row:not(:last-of-type) {
+  padding-bottom: 16px;
+  border-bottom: 1px dotted hsl(250deg 80% 80% / 0.5);
+  margin-bottom: 16px;
+}
+
+.titleMessageWrapper {
+  padding-bottom: 16px;
+  border-bottom: 1px dotted hsl(250deg 80% 80% / 0.5);
+  margin-bottom: 16px;
+}
+.titleMessageRow {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.titleMessageRow:not(:last-of-type) {
+  margin-bottom: 16px;
+}
+
+.label {
+  flex-basis: 160px;
+  text-align: right;
+  font-weight: 700;
+}
+
+.inputWrapper {
+  flex: 1;
+}
+
+.radioWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.radioWrapper label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100px;
+}
+
+.messageInput {
+  display: block;
+  width: 100%;
+  height: 4rem;
+}
+</file>
+
+<file path="src/index.js">
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+import './global-styles.css';
+import App from './components/App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# parcel-generated files
+dist
+.parcel-cache
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+</file>
+
+<file path="public/index.html">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="favicon.png" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Toast Playground</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../src/global-styles.css" />
+    <script type="module" src="../src/index.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+</file>
+
+<file path="src/components/ToastPlayground/ToastPlayground.js">
+import { memo, useContext } from 'react';
+import { messageContext } from '../../context/MessageProvider';
+import { useToasts } from '../../context/ToastProvider';
+import { variantContext } from '../../context/VariantProvider';
+import Button from '../Button';
+import ToastShelf from '../ToastShelf';
+import styles from './ToastPlayground.module.css';
+
+function ToastPlayground() {
+  const { message, setMessage } = useContext(messageContext);
+  const { variant, setVariant, VARIANT_OPTIONS } = useContext(variantContext);
+  const { createToast } = useToasts();
+  console.log('rendering Playground');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    createToast(message, variant);
+    setMessage('');
+    setVariant(VARIANT_OPTIONS[0]);
+  }
+
+  return (
+    <div className={styles.wrapper}>
+      <header>
+        <img alt="Cute toast mascot" src="/toast.png" />
+        <h1>Toast Playground</h1>
+      </header>
+
+      <ToastShelf />
+
+      <form className={styles.controlsWrapper} onSubmit={handleSubmit}>
+        <div className={styles.row}>
+          <label
+            htmlFor="message"
+            className={styles.label}
+            style={{ alignSelf: 'baseline' }}
+          >
+            Message
+          </label>
+          <div className={styles.inputWrapper}>
+            <textarea
+              id="message"
+              className={styles.messageInput}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.label}>Variant</div>
+          <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
+            {VARIANT_OPTIONS.map((type, i) => (
+              <label htmlFor={`variant-${type}`} key={`${type} - ${i}`}>
+                <input
+                  id={`variant-${type}`}
+                  type="radio"
+                  name="variant"
+                  value={type}
+                  checked={type === variant}
+                  onChange={() => setVariant(type)}
+                />
+                {type}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.row}>
+          <div className={styles.label} />
+          <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
+            <Button type="submit">Pop Toast!</Button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export default memo(ToastPlayground);
+</file>
+
+<file path="src/components/VisuallyHidden/VisuallyHidden.js">
+import React from 'react';
+
+import styles from './VisuallyHidden.module.css';
+
+const VisuallyHidden = ({
+  children,
+  className = '',
+  ...delegated
+}) => {
+  const [forceShow, setForceShow] = React.useState(false);
+
+  React.useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      const handleKeyDown = (ev) => {
+        if (ev.key === 'Alt') {
+          setForceShow(true);
+        }
+      };
+
+      const handleKeyUp = () => {
+        setForceShow(false);
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('keyup', handleKeyUp);
+      };
+    }
+  }, []);
+
+  if (forceShow) {
+    return <span className={styles.showWrapper}>{children}</span>;
+  }
+
+  return (
+    <span className={`${className} ${styles.wrapper}`} {...delegated}>
+      {children}
+    </span>
+  );
+};
+
+export default VisuallyHidden;
+</file>
+
+<file path="package.json">
+{
+  "name": "toast-component",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Josh Comeau <me@joshwcomeau.com>",
+  "dependencies": {
+    "eslint": "^8.49.0",
+    "eslint-config-react-app": "^7.0.1",
+    "new-component": "5.0.2",
+    "parcel": "2.12.0",
+    "parcel-reporter-static-files-copy": "1.5.2",
+    "prettier": "2.6.2",
+    "process": "0.11.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-feather": "2.0.10",
+    "rimraf": "^5.0.1"
+  },
+  "scripts": {
+    "predev": "rimraf .parcel-cache dist",
+    "dev": "parcel public/index.html",
+    "build": "parcel build public/index.html",
+    "new-component": "new-component"
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "staticFiles": {
+    "staticPath": "assets"
+  }
+}
+</file>
+
+</files>

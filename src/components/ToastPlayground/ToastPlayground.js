@@ -1,15 +1,23 @@
 import { useState } from 'react';
+import { useToasts } from '../../context/ToastProvider';
 import Button from '../Button';
-
+import ToastShelf from '../ToastShelf';
 import styles from './ToastPlayground.module.css';
-
 const VARIANT_OPTIONS = ['notice', 'warning', 'success', 'error'];
 
 function ToastPlayground() {
   const [message, setMessage] = useState('');
-  console.log(message);
+  const [variant, setVariant] = useState(VARIANT_OPTIONS[0]);
 
-  const handleSubmit = () => {};
+  const { createToast } = useToasts();
+  console.log('rendering Playground');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    createToast(message, variant);
+    setMessage('');
+    setVariant(VARIANT_OPTIONS[0]);
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -18,7 +26,9 @@ function ToastPlayground() {
         <h1>Toast Playground</h1>
       </header>
 
-      <div className={styles.controlsWrapper}>
+      <ToastShelf />
+
+      <form className={styles.controlsWrapper} onSubmit={handleSubmit}>
         <div className={styles.row}>
           <label
             htmlFor="message"
@@ -47,6 +57,8 @@ function ToastPlayground() {
                   type="radio"
                   name="variant"
                   value={type}
+                  checked={type === variant}
+                  onChange={() => setVariant(type)}
                 />
                 {type}
               </label>
@@ -57,10 +69,10 @@ function ToastPlayground() {
         <div className={styles.row}>
           <div className={styles.label} />
           <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <Button>Pop Toast!</Button>
+            <Button type="submit">Pop Toast!</Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
